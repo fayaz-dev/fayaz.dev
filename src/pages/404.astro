@@ -1,0 +1,221 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="404 - Page Not Found" description="The page you're looking for doesn't exist.">
+  <div class="min-h-screen flex items-center justify-center px-4">
+    <div class="text-center max-w-2xl mx-auto">
+      <!-- Three.js Mini Game Container -->
+      <div class="mb-8">
+        <canvas id="game-canvas" class="mx-auto rounded-lg shadow-lg" width="400" height="300"></canvas>
+        <div id="fallback-404" class="hidden">
+          <div class="text-9xl font-bold text-primary-600 mb-4 animate-bounce">404</div>
+        </div>
+      </div>
+      
+      <h1 class="text-4xl font-bold text-neutral-900 mb-4">
+        Oops! Page Not Found
+      </h1>
+      <p class="text-lg text-neutral-600 mb-8 text-pretty">
+        The page you're looking for seems to have wandered off into the digital void. 
+        But hey, while you're here, why not try the mini-game above?
+      </p>
+      
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a
+          href="/"
+          class="px-8 py-3 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+        >
+          Go Home
+        </a>
+        <a
+          href="/blog"
+          class="px-8 py-3 border border-neutral-300 text-neutral-700 rounded-lg font-medium hover:bg-neutral-50 transition-colors focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:ring-offset-2"
+        >
+          Browse Blog
+        </a>
+      </div>
+      
+      <div class="mt-8 text-sm text-neutral-500">
+        <p>🎮 Use arrow keys to move the cube around!</p>
+        <p id="game-score" class="mt-2 font-medium"></p>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  import * as THREE from 'three';
+  
+  // Simple 404 mini-game
+  function init404Game() {
+    const canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
+    const fallback = document.getElementById('fallback-404');
+    const scoreElement = document.getElementById('game-score');
+    
+    if (!canvas) return;
+    
+    try {
+      // Scene setup
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0xf0f9ff);
+      
+      const camera = new THREE.PerspectiveCamera(75, canvas.width / canvas.height, 0.1, 1000);
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+      renderer.setSize(canvas.width, canvas.height);
+      
+      // Player cube
+      const playerGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+      const playerMaterial = new THREE.MeshBasicMaterial({ color: 0x0ea5e9 });
+      const player = new THREE.Mesh(playerGeometry, playerMaterial);
+      scene.add(player);
+      
+      // Collectible items
+      const collectibles: THREE.Mesh[] = [];
+      const collectibleGeometry = new THREE.SphereGeometry(0.2, 16, 16);
+      const collectibleMaterial = new THREE.MeshBasicMaterial({ color: 0xd946ef });
+      
+      // Create collectibles
+      for (let i = 0; i < 5; i++) {
+        const collectible = new THREE.Mesh(collectibleGeometry, collectibleMaterial);
+        collectible.position.set(
+          (Math.random() - 0.5) * 8,
+          (Math.random() - 0.5) * 4,
+          (Math.random() - 0.5) * 4
+        );
+        collectibles.push(collectible);
+        scene.add(collectible);
+      }
+      
+      camera.position.z = 5;
+      
+      // Game state
+      let score = 0;
+      let gameTime = 0;
+      const keys = {
+        left: false,
+        right: false,
+        up: false,
+        down: false
+      };
+      
+      // Input handling
+      document.addEventListener('keydown', (event) => {
+        switch(event.code) {
+          case 'ArrowLeft':
+            keys.left = true;
+            break;
+          case 'ArrowRight':
+            keys.right = true;
+            break;
+          case 'ArrowUp':
+            keys.up = true;
+            break;
+          case 'ArrowDown':
+            keys.down = true;
+            break;
+        }
+      });
+      
+      document.addEventListener('keyup', (event) => {
+        switch(event.code) {
+          case 'ArrowLeft':
+            keys.left = false;
+            break;
+          case 'ArrowRight':
+            keys.right = false;
+            break;
+          case 'ArrowUp':
+            keys.up = false;
+            break;
+          case 'ArrowDown':
+            keys.down = false;
+            break;
+        }
+      });
+      
+      // Game loop
+      function animate() {
+        requestAnimationFrame(animate);
+        gameTime += 0.016; // ~60fps
+        
+        // Player movement
+        const speed = 0.1;
+        if (keys.left) player.position.x -= speed;
+        if (keys.right) player.position.x += speed;
+        if (keys.up) player.position.y += speed;
+        if (keys.down) player.position.y -= speed;
+        
+        // Keep player in bounds
+        player.position.x = Math.max(-4, Math.min(4, player.position.x));
+        player.position.y = Math.max(-2, Math.min(2, player.position.y));
+        
+        // Rotate player
+        player.rotation.x += 0.01;
+        player.rotation.y += 0.01;
+        
+        // Animate collectibles
+        collectibles.forEach((collectible, index) => {
+          collectible.rotation.x += 0.02;
+          collectible.rotation.y += 0.02;
+          collectible.position.y += Math.sin(gameTime + index) * 0.01;
+          
+          // Check collision with player
+          const distance = player.position.distanceTo(collectible.position);
+          if (distance < 0.7) {
+            // Respawn collectible
+            collectible.position.set(
+              (Math.random() - 0.5) * 8,
+              (Math.random() - 0.5) * 4,
+              (Math.random() - 0.5) * 4
+            );
+            score++;
+            
+            // Update score display
+            if (scoreElement) {
+              scoreElement.textContent = `Score: ${score} | Keep collecting the purple spheres!`;
+            }
+          }
+        });
+        
+        renderer.render(scene, camera);
+      }
+      
+      animate();
+      
+      // Initial score display
+      if (scoreElement) {
+        scoreElement.textContent = 'Score: 0 | Use arrow keys to move and collect purple spheres!';
+      }
+      
+    } catch (error) {
+      console.warn('Three.js 404 game failed to initialize:', error);
+      // Show fallback 404
+      if (fallback) {
+        fallback.classList.remove('hidden');
+      }
+      if (canvas) {
+        canvas.style.display = 'none';
+      }
+    }
+  }
+  
+  // Initialize when DOM is loaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init404Game);
+  } else {
+    init404Game();
+  }
+</script>
+
+<style>
+  #game-canvas {
+    border: 2px solid #e5e5e5;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  }
+  
+  #game-canvas:focus {
+    outline: 2px solid #0ea5e9;
+    outline-offset: 2px;
+  }
+</style>

@@ -1,0 +1,36 @@
+---
+export interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+export interface Props {
+  headings: Heading[];
+}
+
+const { headings } = Astro.props;
+
+// Filter out h1 headings and organize by depth
+const tocHeadings = headings.filter(h => h.depth > 1 && h.depth <= 4);
+---
+
+{tocHeadings.length > 0 && (
+  <div class="toc">
+    <h3 class="text-lg font-semibold text-neutral-900 mb-4">Table of Contents</h3>
+    <nav aria-label="Table of contents">
+      <ul class="space-y-2">
+        {tocHeadings.map(heading => (
+          <li style={`margin-left: ${(heading.depth - 2) * 1}rem`}>
+            <a
+              href={`#${heading.slug}`}
+              class="block text-sm text-neutral-600 hover:text-primary-600 transition-colors py-1"
+            >
+              {heading.text}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  </div>
+)}

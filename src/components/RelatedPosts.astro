@@ -1,0 +1,67 @@
+---
+import { formatDate } from '../utils/date';
+
+export interface Post {
+  slug: string;
+  data: {
+    title: string;
+    description: string;
+    publishDate: string;
+    tags: string[];
+    image?: string;
+  };
+}
+
+export interface Props {
+  posts: Post[];
+}
+
+const { posts } = Astro.props;
+---
+
+<section class="related-posts">
+  <h3 class="text-2xl font-bold text-neutral-900 mb-6">Related Posts</h3>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {posts.map(post => (
+      <article class="card rounded-lg p-6 hover:shadow-lg transition-all duration-300">
+        {post.data.image && (
+          <div class="mb-4">
+            <img
+              src={post.data.image}
+              alt={post.data.title}
+              class="w-full h-32 object-cover rounded-md"
+              loading="lazy"
+            />
+          </div>
+        )}
+        <div class="flex flex-wrap gap-1 mb-3">
+          {post.data.tags.slice(0, 2).map(tag => (
+            <span class="tag text-xs">
+              {tag}
+            </span>
+          ))}
+        </div>
+        <h4 class="text-lg font-semibold text-neutral-900 mb-2 line-clamp-2">
+          <a href={`/blog/${post.slug}`} class="hover:text-primary-600 transition-colors">
+            {post.data.title}
+          </a>
+        </h4>
+        <p class="text-neutral-600 text-sm mb-3 line-clamp-2">
+          {post.data.description}
+        </p>
+        <time class="text-xs text-neutral-500" datetime={post.data.publishDate}>
+          {formatDate(post.data.publishDate)}
+        </time>
+      </article>
+    ))}
+  </div>
+</section>
+
+<style>
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>

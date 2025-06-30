@@ -1,0 +1,51 @@
+# Developer's Desk - Current workspace and activities
+last_updated: "2025-01-27"
+
+current_projects:
+  - name: "fayaz.dev Blog"
+    description: "Building a creative developer blog with Astro"
+    status: "active"
+    progress: 85
+    
+  - name: "React Component Library"
+    description: "Creating reusable UI components for future projects"
+    status: "planning"
+    progress: 15
+    
+  - name: "Three.js Experiments"
+    description: "Exploring 3D web graphics and animations"
+    status: "learning"
+    progress: 40
+
+currently_learning:
+  - "Advanced Three.js techniques"
+  - "Rust programming language"
+  - "WebGL shaders"
+  - "Design systems"
+
+tools_in_use:
+  - "VS Code with Vim extension"
+  - "Arc Browser"
+  - "Figma for design"
+  - "Linear for project management"
+  - "Spotify for focus music"
+
+reading:
+  - title: "The Pragmatic Programmer"
+    author: "David Thomas & Andrew Hunt"
+    progress: 60
+    
+  - title: "Refactoring UI"
+    author: "Adam Wathan & Steve Schoger"
+    progress: 100
+    
+current_mood: "🚀 Excited about new web technologies"
+coffee_count: 3
+favorite_playlist: "Deep Focus - Spotify"
+
+workspace:
+  setup: "MacBook Pro 16\" + 27\" External Monitor"
+  keyboard: "Keychron K2 Mechanical"
+  mouse: "Logitech MX Master 3"
+  headphones: "Sony WH-1000XM4"
+  desk: "Standing desk with plants 🌱"

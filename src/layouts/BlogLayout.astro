@@ -1,0 +1,200 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import TableOfContents from '../components/TableOfContents.astro';
+import ShareButtons from '../components/ShareButtons.astro';
+import RelatedPosts from '../components/RelatedPosts.astro';
+import { getCollection } from 'astro:content';
+import { formatDate } from '../utils/date';
+import readingTime from 'reading-time';
+
+export interface Props {
+  frontmatter: {
+    title: string;
+    description: string;
+    publishDate: string;
+    updateDate?: string;
+    tags: string[];
+    image?: string;
+    author?: string;
+    draft?: boolean;
+  };
+  headings: Array<{
+    depth: number;
+    slug: string;
+    text: string;
+  }>;
+  slug: string;
+}
+
+const { frontmatter, headings, slug } = Astro.props;
+const { title, description, publishDate, updateDate, tags, image, author } = frontmatter;
+
+// Get post content for reading time calculation
+const posts = await getCollection('blog');
+const currentPost = posts.find(post => post.slug === slug);
+const content = currentPost?.body || '';
+const readingStats = readingTime(content);
+
+// Get related posts
+const relatedPosts = posts
+  .filter(post => 
+    post.slug !== slug && 
+    !post.data.draft &&
+    post.data.tags.some(tag => tags.includes(tag))
+  )
+  .slice(0, 3);
+
+const breadcrumbItems = [
+  { label: 'Home', href: '/' },
+  { label: 'Blog', href: '/blog' },
+  { label: title, href: `/blog/${slug}` }
+];
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  image={image}
+  article={true}
+  publishedTime={publishDate}
+  modifiedTime={updateDate}
+  tags={tags}
+  author={author}
+>
+  <article class="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+    <Breadcrumb items={breadcrumbItems} />
+    
+    <header class="mb-8">
+      <div class="mb-4">
+        <div class="flex flex-wrap gap-2 mb-4">
+          {tags.map(tag => (
+            <a href={`/blog/tags/${tag}`} class="tag">
+              {tag}
+            </a>
+          ))}
+        </div>
+        <h1 class="text-4xl font-bold text-neutral-900 mb-4 text-balance">
+          {title}
+        </h1>
+        <p class="text-xl text-neutral-600 mb-6 text-pretty">
+          {description}
+        </p>
+        <div class="flex items-center gap-4 text-sm text-neutral-500">
+          <time datetime={publishDate}>
+            {formatDate(publishDate)}
+          </time>
+          {updateDate && (
+            <>
+              <span>•</span>
+              <span>Updated {formatDate(updateDate)}</span>
+            </>
+          )}
+          <span>•</span>
+          <span>{readingStats.text}</span>
+          {author && (
+            <>
+              <span>•</span>
+              <span>By {author}</span>
+            </>
+          )}
+        </div>
+      </div>
+      
+      {image && (
+        <div class="mb-8">
+          <img
+            src={image}
+            alt={title}
+            class="w-full h-64 object-cover rounded-lg shadow-lg"
+            loading="lazy"
+          />
+        </div>
+      )}
+    </header>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div class="lg:col-span-3">
+        <div class="prose prose-lg max-w-none">
+          <slot />
+        </div>
+        
+        <div class="mt-12 pt-8 border-t border-neutral-200">
+          <ShareButtons title={title} url={Astro.url.href} />
+        </div>
+        
+        {relatedPosts.length > 0 && (
+          <div class="mt-12">
+            <RelatedPosts posts={relatedPosts} />
+          </div>
+        )}
+        
+        <div class="mt-8">
+          <a
+            href="/blog"
+            class="inline-flex items-center text-primary-600 hover:text-primary-700 font-medium transition-colors group"
+          >
+            <svg class="h-4 w-4 mr-2 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to Blog
+          </a>
+        </div>
+      </div>
+      
+      {headings.length > 0 && (
+        <div class="lg:col-span-1">
+          <TableOfContents headings={headings} />
+        </div>
+      )}
+    </div>
+  </article>
+</BaseLayout>
+
+<script>
+  // Table of contents active link highlighting
+  const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+  const tocLinks = document.querySelectorAll('.toc a');
+  
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const id = entry.target.id;
+          tocLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${id}`) {
+              link.classList.add('active');
+            }
+          });
+        }
+      });
+    },
+    {
+      rootMargin: '-100px 0px -66%',
+      threshold: 0
+    }
+  );
+  
+  headings.forEach(heading => {
+    if (heading.id) {
+      observer.observe(heading);
+    }
+  });
+  
+  // Smooth scroll for TOC links
+  tocLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const targetId = link.getAttribute('href')?.substring(1);
+      const targetElement = document.getElementById(targetId || '');
+      
+      if (targetElement) {
+        targetElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    });
+  });
+</script>

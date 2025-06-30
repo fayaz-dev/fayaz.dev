@@ -1,0 +1,277 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import HeroAnimation from '../components/HeroAnimation.astro';
+import QuoteGenerator from '../components/QuoteGenerator.astro';
+import { getCollection } from 'astro:content';
+import { formatDate } from '../utils/date';
+import yaml from 'js-yaml';
+import fs from 'fs';
+import path from 'path';
+
+// Get featured blog posts
+const allPosts = await getCollection('blog');
+const featuredPosts = allPosts
+  .filter(post => !post.data.draft && post.data.featured)
+  .sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf())
+  .slice(0, 3);
+
+const recentPosts = allPosts
+  .filter(post => !post.data.draft)
+  .sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf())
+  .slice(0, 6);
+
+// Load tools data
+const toolsPath = path.join(process.cwd(), 'src/data/tools.yaml');
+const toolsData = yaml.load(fs.readFileSync(toolsPath, 'utf8')) as any;
+
+// Calculate streak (days since last post)
+const lastPost = recentPosts[0];
+const daysSinceLastPost = lastPost 
+  ? Math.floor((new Date().getTime() - lastPost.data.publishDate.getTime()) / (1000 * 60 * 60 * 24))
+  : 0;
+---
+
+<BaseLayout title="fayaz.dev - Creative Developer Blog">
+  <!-- Hero Section -->
+  <section class="relative overflow-hidden bg-gradient-to-br from-neutral-50 to-primary-50 py-20">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div class="text-center lg:text-left">
+          <h1 class="text-4xl md:text-6xl font-bold text-neutral-900 mb-6 animate-fade-in">
+            Creative Developer
+          </h1>
+          <p class="text-xl text-neutral-600 mb-8 animate-slide-up text-pretty">
+            Welcome to my unpolished corner of the internet where I share insights on 
+            web development, design, and the creative process behind building digital experiences.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start animate-slide-up">
+            <a
+              href="/blog"
+              class="px-8 py-3 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+            >
+              Read the Blog
+            </a>
+            <a
+              href="/about"
+              class="px-8 py-3 border border-neutral-300 text-neutral-700 rounded-lg font-medium hover:bg-neutral-50 transition-colors focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:ring-offset-2"
+            >
+              About Me
+            </a>
+          </div>
+        </div>
+        <div class="animate-scale-in">
+          <HeroAnimation />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="py-12 bg-white border-b border-neutral-200">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+        <div class="animate-fade-in">
+          <div class="text-3xl font-bold text-primary-600 mb-2">{recentPosts.length}</div>
+          <div class="text-neutral-600">Blog Posts</div>
+        </div>
+        <div class="animate-fade-in" style="animation-delay: 0.1s;">
+          <div class="text-3xl font-bold text-accent-600 mb-2">{daysSinceLastPost}</div>
+          <div class="text-neutral-600">Days Since Last Post</div>
+        </div>
+        <div class="animate-fade-in" style="animation-delay: 0.2s;">
+          <div class="text-3xl font-bold text-primary-600 mb-2">∞</div>
+          <div class="text-neutral-600">Ideas in Progress</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Posts Section -->
+  {featuredPosts.length > 0 && (
+    <section class="py-16 bg-neutral-50">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl font-bold text-neutral-900 mb-4">Featured Posts</h2>
+          <p class="text-lg text-neutral-600">Handpicked articles worth your time</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {featuredPosts.map((post, index) => (
+            <article class="card rounded-lg p-6 animate-slide-up" style={`animation-delay: ${index * 0.1}s;`}>
+              {post.data.image && (
+                <div class="mb-4">
+                  <img
+                    src={post.data.image}
+                    alt={post.data.title}
+                    class="w-full h-48 object-cover rounded-md"
+                    loading="lazy"
+                  />
+                </div>
+              )}
+              <div class="flex flex-wrap gap-2 mb-3">
+                {post.data.tags.slice(0, 2).map(tag => (
+                  <span class="tag text-xs">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              <h3 class="text-xl font-semibold text-neutral-900 mb-3">
+                <a href={`/blog/${post.slug}`} class="hover:text-primary-600 transition-colors">
+                  {post.data.title}
+                </a>
+              </h3>
+              <p class="text-neutral-600 mb-4 line-clamp-3">
+                {post.data.description}
+              </p>
+              <div class="flex items-center justify-between text-sm text-neutral-500">
+                <time datetime={post.data.publishDate.toISOString()}>
+                  {formatDate(post.data.publishDate)}
+                </time>
+                <a
+                  href={`/blog/${post.slug}`}
+                  class="text-primary-600 hover:text-primary-700 font-medium transition-colors"
+                >
+                  Read more →
+                </a>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Recent Posts Section -->
+  <section class="py-16 bg-white">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between mb-12">
+        <div>
+          <h2 class="text-3xl font-bold text-neutral-900 mb-4">Recent Posts</h2>
+          <p class="text-lg text-neutral-600">Latest thoughts and discoveries</p>
+        </div>
+        <a
+          href="/blog"
+          class="text-primary-600 hover:text-primary-700 font-medium transition-colors"
+        >
+          View all posts →
+        </a>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {recentPosts.map((post, index) => (
+          <article class="card rounded-lg p-6 animate-slide-up" style={`animation-delay: ${index * 0.05}s;`}>
+            <div class="flex flex-wrap gap-2 mb-3">
+              {post.data.tags.slice(0, 2).map(tag => (
+                <span class="tag text-xs">
+                  {tag}
+                </span>
+              ))}
+            </div>
+            <h3 class="text-lg font-semibold text-neutral-900 mb-2">
+              <a href={`/blog/${post.slug}`} class="hover:text-primary-600 transition-colors">
+                {post.data.title}
+              </a>
+            </h3>
+            <p class="text-neutral-600 text-sm mb-3 line-clamp-2">
+              {post.data.description}
+            </p>
+            <time class="text-xs text-neutral-500" datetime={post.data.publishDate.toISOString()}>
+              {formatDate(post.data.publishDate)}
+            </time>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Quote Generator Section -->
+  <section class="py-16 bg-neutral-50">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-8">
+        <h2 class="text-3xl font-bold text-neutral-900 mb-4">Daily Inspiration</h2>
+        <p class="text-lg text-neutral-600">Random wisdom from fellow developers</p>
+      </div>
+      <QuoteGenerator />
+    </div>
+  </section>
+
+  <!-- Developer Toolbox Section -->
+  <section class="py-16 bg-white">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold text-neutral-900 mb-4">Developer Toolbox</h2>
+        <p class="text-lg text-neutral-600">Technologies and tools I work with</p>
+      </div>
+      <div class="space-y-12">
+        {toolsData.categories.map((category: any, categoryIndex: number) => (
+          <div class="animate-fade-in" style={`animation-delay: ${categoryIndex * 0.1}s;`}>
+            <h3 class="text-2xl font-semibold text-neutral-900 mb-6">{category.name}</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {category.tools.map((tool: any, toolIndex: number) => (
+                <a
+                  href={tool.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="card rounded-lg p-4 hover:shadow-lg transition-all duration-300 group"
+                  style={`animation-delay: ${(categoryIndex * 0.1) + (toolIndex * 0.05)}s;`}
+                >
+                  <div class="flex items-center space-x-3">
+                    <span class="text-2xl">{tool.icon}</span>
+                    <div>
+                      <h4 class="font-semibold text-neutral-900 group-hover:text-primary-600 transition-colors">
+                        {tool.name}
+                      </h4>
+                      <p class="text-sm text-neutral-600 line-clamp-2">
+                        {tool.description}
+                      </p>
+                    </div>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- About the Author Section -->
+  <section class="py-16 bg-gradient-to-br from-primary-50 to-accent-50">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
+      <div class="animate-scale-in">
+        <div class="w-24 h-24 bg-gradient-to-br from-primary-600 to-accent-600 rounded-full mx-auto mb-6 flex items-center justify-center text-white text-2xl font-bold">
+          FA
+        </div>
+        <h2 class="text-3xl font-bold text-neutral-900 mb-4">About the Author</h2>
+        <p class="text-lg text-neutral-600 mb-6 text-pretty">
+          I'm Fayaz Ahmed, a creative developer passionate about building beautiful, 
+          accessible web experiences. When I'm not coding, you'll find me exploring 
+          new technologies, contributing to open source, or sharing knowledge with the community.
+        </p>
+        <a
+          href="/about"
+          class="inline-flex items-center px-6 py-3 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+        >
+          Learn more about me
+          <svg class="ml-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>

@@ -1,0 +1,16 @@
+{
+  "name": "fayaz.dev - Creative Developer Blog",
+  "short_name": "fayaz.dev",
+  "description": "Unpolished blog of Fayaz Ahmed - Creative developer sharing insights on web development, design, and technology.",
+  "start_url": "/",
+  "display": "minimal-ui",
+  "background_color": "#ffffff",
+  "theme_color": "#0ea5e9",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

@@ -1,2 +1,2 @@
 # fayaz.dev
-Blog of Fayaz Ahmed
+Unpolished blog of Fayaz Ahmed

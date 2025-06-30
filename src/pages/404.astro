@@ -1,0 +1,131 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Header from '@/components/Header.astro';
+import Footer from '@/components/Footer.astro';
+---
+
+<BaseLayout title="404 - Page Not Found">
+  <Header />
+  
+  <main class="min-h-screen flex items-center justify-center">
+    <div class="text-center px-4 sm:px-6 lg:px-8">
+      <!-- 3D 404 Animation Container -->
+      <div id="three-404" class="w-full h-64 mb-8 relative">
+        <div class="absolute inset-0 flex items-center justify-center">
+          <div class="text-8xl font-bold text-gray-200 dark:text-gray-700 animate-pulse">
+            404
+          </div>
+        </div>
+      </div>
+      
+      <h1 class="text-4xl sm:text-5xl font-display font-bold text-gray-900 dark:text-white mb-6">
+        Oops! Page Not Found
+      </h1>
+      
+      <p class="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
+        The page you're looking for seems to have wandered off into the digital void. 
+        Don't worry, even the best developers get lost sometimes!
+      </p>
+      
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a 
+          href="/" 
+          class="bg-gradient-to-r from-primary-600 to-accent-600 hover:from-primary-700 hover:to-accent-700 text-white font-medium px-8 py-3 rounded-lg transition-all duration-200 transform hover:scale-105"
+        >
+          Go Home
+        </a>
+        <a 
+          href="/blog" 
+          class="border-2 border-primary-600 text-primary-600 dark:text-primary-400 dark:border-primary-400 hover:bg-primary-600 hover:text-white dark:hover:bg-primary-400 dark:hover:text-gray-900 font-medium px-8 py-3 rounded-lg transition-all duration-200"
+        >
+          Browse Blog
+        </a>
+      </div>
+      
+      <!-- Fun 404 Game -->
+      <div class="mt-12 p-6 bg-gray-50 dark:bg-gray-800 rounded-lg max-w-md mx-auto">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          Mini Game: Catch the Bug! 🐛
+        </h3>
+        <div id="bug-game" class="relative h-32 bg-white dark:bg-gray-700 rounded border-2 border-dashed border-gray-300 dark:border-gray-600 overflow-hidden cursor-pointer">
+          <div id="bug" class="absolute w-6 h-6 text-2xl transition-all duration-1000 ease-in-out">
+            🐛
+          </div>
+        </div>
+        <p class="text-sm text-gray-600 dark:text-gray-300 mt-2">
+          Score: <span id="score">0</span> | Click the bug to catch it!
+        </p>
+      </div>
+      
+      <!-- Helpful Links -->
+      <div class="mt-12">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          Popular Pages
+        </h3>
+        <div class="flex flex-wrap justify-center gap-4">
+          <a href="/blog" class="text-primary-600 dark:text-primary-400 hover:underline">Blog</a>
+          <a href="/about" class="text-primary-600 dark:text-primary-400 hover:underline">About</a>
+          <a href="/blog/welcome-to-my-blog" class="text-primary-600 dark:text-primary-400 hover:underline">Latest Post</a>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <Footer />
+  
+  <script>
+    // Simple bug catching game
+    const bugGame = document.getElementById('bug-game');
+    const bug = document.getElementById('bug');
+    const scoreElement = document.getElementById('score');
+    let score = 0;
+    
+    function moveBug() {
+      if (!bugGame || !bug) return;
+      
+      const gameRect = bugGame.getBoundingClientRect();
+      const maxX = gameRect.width - 24; // bug width
+      const maxY = gameRect.height - 24; // bug height
+      
+      const x = Math.random() * maxX;
+      const y = Math.random() * maxY;
+      
+      bug.style.left = `${x}px`;
+      bug.style.top = `${y}px`;
+    }
+    
+    bug?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      score++;
+      scoreElement!.textContent = score.toString();
+      moveBug();
+      
+      // Add a little celebration effect
+      bug.style.transform = 'scale(1.5)';
+      setTimeout(() => {
+        bug.style.transform = 'scale(1)';
+      }, 200);
+    });
+    
+    // Move bug every 2 seconds
+    setInterval(moveBug, 2000);
+    
+    // Initial position
+    moveBug();
+    
+    // Try to load Three.js 404 animation (fallback to CSS if Three.js fails)
+    const three404Container = document.getElementById('three-404');
+    
+    // Simple CSS animation fallback
+    if (three404Container) {
+      const numbers = three404Container.querySelector('div');
+      if (numbers) {
+        let rotation = 0;
+        setInterval(() => {
+          rotation += 1;
+          numbers.style.transform = `rotateY(${rotation}deg)`;
+        }, 50);
+      }
+    }
+  </script>
+</BaseLayout>

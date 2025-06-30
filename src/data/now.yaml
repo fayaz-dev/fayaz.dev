@@ -1,0 +1,32 @@
+current_status:
+  location: "Remote"
+  timezone: "UTC+5:30"
+  current_project: "Building fayaz.dev - A creative developer blog"
+  learning: "Advanced Three.js animations and WebGL shaders"
+  reading: "Clean Architecture by Robert C. Martin"
+  
+workspace:
+  setup: "MacBook Pro 16-inch, External 4K Monitor"
+  editor: "VS Code with custom theme"
+  terminal: "iTerm2 with Oh My Zsh"
+  music: "Lo-fi hip hop for coding sessions"
+  
+recent_activities:
+  - date: "2025-01-27"
+    activity: "Launched new blog with Astro and Supabase integration"
+  - date: "2025-01-26"
+    activity: "Implemented Three.js hero animation with performance optimizations"
+  - date: "2025-01-25"
+    activity: "Designed accessible comment system with nested replies"
+  - date: "2025-01-24"
+    activity: "Created interactive blog post mind-map visualization"
+
+goals:
+  short_term:
+    - "Complete blog migration from previous platform"
+    - "Write comprehensive guide on modern web development"
+    - "Implement advanced search functionality"
+  long_term:
+    - "Build open-source developer tools"
+    - "Speak at major tech conferences"
+    - "Mentor aspiring developers"
